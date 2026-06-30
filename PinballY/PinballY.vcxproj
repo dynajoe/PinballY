@@ -22,32 +22,32 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{6BA513E9-8B10-4246-8AF4-89F44437ADBE}</ProjectGuid>
     <RootNamespace>PinballY</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -71,20 +71,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\ChakraCore\include;..\DirectXTK\Inc;..\VLC\sdk\include;$(IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)\libpng</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath);..\ChakraCore\$(Platform)\$(Configuration);..\ChakraCore\$(PlatformTarget)\lib;..\ChakraCore\libboost;$(DXSDK_DIR)Lib\$(PlatformTarget)</LibraryPath>
+    <IncludePath>..\ChakraCore\include;..\DirectXTK\Inc;..\VLC\sdk\include;$(IncludePath);$(SolutionDir)\libpng</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath);..\ChakraCore\$(Platform)\$(Configuration);..\ChakraCore\$(PlatformTarget)\lib;..\ChakraCore\libboost</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\ChakraCore\include;..\DirectXTK\Inc;..\VLC\sdk\include;$(IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)\libpng</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath);..\ChakraCore\$(Platform)\$(Configuration);..\ChakraCore\$(PlatformTarget)\lib;..\ChakraCore\libboost;$(DXSDK_DIR)Lib\$(PlatformTarget)</LibraryPath>
+    <IncludePath>..\ChakraCore\include;..\DirectXTK\Inc;..\VLC\sdk\include;$(IncludePath);$(SolutionDir)\libpng</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath);..\ChakraCore\$(Platform)\$(Configuration);..\ChakraCore\$(PlatformTarget)\lib;..\ChakraCore\libboost</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\ChakraCore\include;..\DirectXTK\Inc;..\VLC\sdk\include;$(IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)\libpng</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath);..\ChakraCore\$(Platform)\$(Configuration);..\ChakraCore\$(PlatformTarget)\lib;..\ChakraCore\libboost;$(DXSDK_DIR)Lib\$(PlatformTarget)</LibraryPath>
+    <IncludePath>..\ChakraCore\include;..\DirectXTK\Inc;..\VLC\sdk\include;$(IncludePath);$(SolutionDir)\libpng</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath);..\ChakraCore\$(Platform)\$(Configuration);..\ChakraCore\$(PlatformTarget)\lib;..\ChakraCore\libboost</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\ChakraCore\include;..\DirectXTK\Inc;..\VLC\sdk\include;$(IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)\libpng</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath);..\ChakraCore\$(Platform)\$(Configuration);..\ChakraCore\$(PlatformTarget)\lib;..\ChakraCore\libboost;$(DXSDK_DIR)Lib\$(PlatformTarget)</LibraryPath>
+    <IncludePath>..\ChakraCore\include;..\DirectXTK\Inc;..\VLC\sdk\include;$(IncludePath);$(SolutionDir)\libpng</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath);..\ChakraCore\$(Platform)\$(Configuration);..\ChakraCore\$(PlatformTarget)\lib;..\ChakraCore\libboost</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -94,12 +94,12 @@
       <ConformanceMode>false</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>ZLIB_WINAPI;_WIN32_WINNT=0x0601;_UNICODE;UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ZLIB_WINAPI;_WIN32_WINNT=0x0A00;_UNICODE;UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>..\VersionInfoUpdater\bin\$(Platform)_$(Configuration)\VersionInfo.obj;$(OutDir)Utilities.lib;$(SolutionDir)$(Platform)\$(Configuration)\litehtml.lib;..\DirectXTK\bin\Desktop_2017\$(Configuration)\$(Platform)\DirectXTK.lib;..\DirectXTK\Audio\bin\Desktop_2017_DXSDK\$(Platform)\$(Configuration)\DirectXTKAudioDX.lib;..\DirectXTex\DirectXTex\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\VersionInfoUpdater\bin\$(Platform)_$(Configuration)\VersionInfo.obj;$(OutDir)Utilities.lib;$(SolutionDir)$(Platform)\$(Configuration)\litehtml.lib;..\DirectXTK\bin\Desktop_2017\$(Configuration)\$(Platform)\DirectXTK.lib;..\DirectXTK\Audio\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;..\DirectXTex\DirectXTex\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <MinimumRequiredVersion>
       </MinimumRequiredVersion>
@@ -128,12 +128,12 @@ echo $(SolutionDir)&gt; "$(OutDir).DevEnvironment
       <ConformanceMode>false</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>_WIN32_WINNT=0x0601;_UNICODE;UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN32_WINNT=0x0A00;_UNICODE;UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>..\VersionInfoUpdater\bin\$(Platform)_$(Configuration)\VersionInfo.obj;$(OutDir)Utilities.lib;$(SolutionDir)$(Platform)\$(Configuration)\litehtml.lib;..\DirectXTK\bin\Desktop_2017\$(Configuration)\$(Platform)\DirectXTK.lib;..\DirectXTK\Audio\bin\Desktop_2017_DXSDK\$(Platform)\$(Configuration)\DirectXTKAudioDX.lib;..\DirectXTex\DirectXTex\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTex.lib;d3d11.lib;dxguid.lib;Uxtheme.lib;pdh.lib;hid.lib;gdiplus.lib;shlwapi.lib;winmm.lib;Dwmapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\VersionInfoUpdater\bin\$(Platform)_$(Configuration)\VersionInfo.obj;$(OutDir)Utilities.lib;$(SolutionDir)$(Platform)\$(Configuration)\litehtml.lib;..\DirectXTK\bin\Desktop_2017\$(Configuration)\$(Platform)\DirectXTK.lib;..\DirectXTK\Audio\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;..\DirectXTex\DirectXTex\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTex.lib;d3d11.lib;dxguid.lib;Uxtheme.lib;pdh.lib;hid.lib;gdiplus.lib;shlwapi.lib;winmm.lib;Dwmapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <MinimumRequiredVersion>
       </MinimumRequiredVersion>
       <AdditionalOptions>/NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
@@ -163,14 +163,14 @@ echo $(SolutionDir)&gt; "$(OutDir).DevEnvironment
       <ConformanceMode>false</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>ZLIB_WINAPI;_WIN32_WINNT=0x0601;_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ZLIB_WINAPI;_WIN32_WINNT=0x0A00;_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>..\VersionInfoUpdater\bin\$(Platform)_$(Configuration)\VersionInfo.obj;$(OutDir)Utilities.lib;$(SolutionDir)$(Platform)\$(Configuration)\litehtml.lib;..\DirectXTK\bin\Desktop_2017\$(Configuration)\$(Platform)\DirectXTK.lib;..\DirectXTK\Audio\bin\Desktop_2017_DXSDK\$(Platform)\$(Configuration)\DirectXTKAudioDX.lib;..\DirectXTex\DirectXTex\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\VersionInfoUpdater\bin\$(Platform)_$(Configuration)\VersionInfo.obj;$(OutDir)Utilities.lib;$(SolutionDir)$(Platform)\$(Configuration)\litehtml.lib;..\DirectXTK\bin\Desktop_2017\$(Configuration)\$(Platform)\DirectXTK.lib;..\DirectXTK\Audio\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;..\DirectXTex\DirectXTex\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <MinimumRequiredVersion>
       </MinimumRequiredVersion>
@@ -201,14 +201,14 @@ echo $(SolutionDir)&gt; "$(OutDir).DevEnvironment
       <ConformanceMode>false</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>_WIN32_WINNT=0x0601;_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN32_WINNT=0x0A00;_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>..\VersionInfoUpdater\bin\$(Platform)_$(Configuration)\VersionInfo.obj;$(OutDir)Utilities.lib;$(SolutionDir)$(Platform)\$(Configuration)\litehtml.lib;..\DirectXTK\bin\Desktop_2017\$(Configuration)\$(Platform)\DirectXTK.lib;..\DirectXTK\Audio\bin\Desktop_2017_DXSDK\$(Platform)\$(Configuration)\DirectXTKAudioDX.lib;..\DirectXTex\DirectXTex\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTex.lib;d3d11.lib;dxguid.lib;Uxtheme.lib;pdh.lib;hid.lib;gdiplus.lib;shlwapi.lib;winmm.lib;Dwmapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\VersionInfoUpdater\bin\$(Platform)_$(Configuration)\VersionInfo.obj;$(OutDir)Utilities.lib;$(SolutionDir)$(Platform)\$(Configuration)\litehtml.lib;..\DirectXTK\bin\Desktop_2017\$(Configuration)\$(Platform)\DirectXTK.lib;..\DirectXTK\Audio\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;..\DirectXTex\DirectXTex\Bin\Desktop_2017\$(Platform)\$(Configuration)\DirectXTex.lib;d3d11.lib;dxguid.lib;Uxtheme.lib;pdh.lib;hid.lib;gdiplus.lib;shlwapi.lib;winmm.lib;Dwmapi.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <MinimumRequiredVersion>
       </MinimumRequiredVersion>
       <AdditionalOptions>/NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
