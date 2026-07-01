@@ -678,6 +678,9 @@ protected:
 		// have we reached EOF?
 		bool eof = false;
 
+		// running total of animation-frame texture memory, in bytes (capped)
+		size_t loadedTexBytes = 0;
+
 		// number of fcTL records we've encountered so far
 		int fcTLCount = 0;
 

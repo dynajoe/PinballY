@@ -431,15 +431,19 @@ bool Sprite::APNGLoaderState::Init(Sprite *sprite, const WCHAR *filename, POINTF
 	// Start the image processing
 	StartProcessing();
 
-	// Read the first frame.  If decoding fails, or the PNG file doesn't
-	// have the added chunks that make it an APNG, abort and use the
-	// standard WIC loader.
-	if (!ReadThroughNextFrame() || !isAnimated)
+	// If it's not animated, or decoding fails (including an allocation failure),
+	// fall back to the standard static WIC loader.
+	try
+	{
+		if (!ReadThroughNextFrame() || !isAnimated)
+			return false;
+		if (!CreateAnimFrame(sprite->loadContext))
+			return false;
+	}
+	catch (const std::exception &)
+	{
 		return false;
-
-	// Create first snimation frame
-	if (!CreateAnimFrame(sprite->loadContext))
-		return false;
+	}
 
 	// success
 	return true;
@@ -447,9 +451,18 @@ bool Sprite::APNGLoaderState::Init(Sprite *sprite, const WCHAR *filename, POINTF
 
 void Sprite::APNGLoaderState::DecodeNext(LoadContext *ctx)
 {
-	// read through the next frame
-	if (!eof && ReadThroughNextFrame())
-		CreateAnimFrame(ctx);
+	// This runs during rendering, so on an allocation failure mid-decode, stop
+	// the animation gracefully rather than letting the exception crash the app.
+	try
+	{
+		if (!eof && ReadThroughNextFrame())
+			CreateAnimFrame(ctx);
+	}
+	catch (const std::exception &)
+	{
+		LogFile::Get()->Write(_T("APNG: decode failed (out of memory?); stopping animation\n"));
+		eof = true;
+	}
 }
 
 bool Sprite::APNGLoaderState::CreateAnimFrame(LoadContext *ctx)
@@ -458,18 +471,65 @@ bool Sprite::APNGLoaderState::CreateAnimFrame(LoadContext *ctx)
 	if (frameCur.data == nullptr)
 		return false;
 
+	// Downscale oversized frames to display size.  We keep every frame resident
+	// as a texture, so full-res multi-frame APNGs can exhaust the address space.
+	static const UINT maxEdge = 512;
+	UINT texW = frameCur.width, texH = frameCur.height;
+	const BYTE *texData = frameCur.data.get();
+	UINT texPitch = frameCur.width * 4;
+	DirectX::ScratchImage scaled;   // owns the downscaled pixels while we upload
+	if (frameCur.width > maxEdge || frameCur.height > maxEdge)
+	{
+		UINT longEdge = frameCur.width > frameCur.height ? frameCur.width : frameCur.height;
+		double s = static_cast<double>(maxEdge) / longEdge;
+		texW = static_cast<UINT>(frameCur.width * s); if (texW < 1) texW = 1;
+		texH = static_cast<UINT>(frameCur.height * s); if (texH < 1) texH = 1;
+
+		// high-quality resample via DirectXTex (already a project dependency)
+		DirectX::Image srcImg;
+		ZeroMemory(&srcImg, sizeof(srcImg));
+		srcImg.width = frameCur.width;
+		srcImg.height = frameCur.height;
+		srcImg.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srcImg.rowPitch = static_cast<size_t>(frameCur.width) * 4;
+		srcImg.slicePitch = srcImg.rowPitch * frameCur.height;
+		srcImg.pixels = frameCur.data.get();
+		if (FAILED(DirectX::Resize(srcImg, texW, texH, DirectX::TEX_FILTER_FANT, scaled)))
+		{
+			// resize failed (e.g. out of memory) - stop decoding, keep what we have
+			eof = true;
+			return false;
+		}
+		const DirectX::Image *out = scaled.GetImage(0, 0, 0);
+		texData = out->pixels;
+		texPitch = static_cast<UINT>(out->rowPitch);
+	}
+
+	// Cap total animation texture memory; when exceeded, stop and loop what we
+	// have.  Always allow the first frame so there's something to display.
+	const size_t maxTexBytes = 64 * 1024 * 1024;
+	const size_t frameBytes = static_cast<size_t>(texW) * texH * 4;
+	if (!ctx->animFrames.empty() && loadedTexBytes + frameBytes > maxTexBytes)
+	{
+		LogFile::Get()->Write(_T("APNG: %u MB texture budget reached after %u frame(s); ")
+			_T("capping animation to avoid exhausting memory\n"),
+			(unsigned)(maxTexBytes / (1024 * 1024)), (unsigned)ctx->animFrames.size());
+		eof = true;
+		return false;
+	}
+
 	// set up the D3D texture descriptor
 	D3D11_TEXTURE2D_DESC txd = CD3D11_TEXTURE2D_DESC(
-		DXGI_FORMAT_R8G8B8A8_UNORM, frameCur.width, frameCur.height, 1, 1,
+		DXGI_FORMAT_R8G8B8A8_UNORM, texW, texH, 1, 1,
 		D3D11_BIND_SHADER_RESOURCE, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE,
 		1, 0, 0);
 
 	// set up the subresource descriptor
 	D3D11_SUBRESOURCE_DATA srd;
 	ZeroMemory(&srd, sizeof(srd));
-	srd.pSysMem = frameCur.data.get();
-	srd.SysMemPitch = frameCur.width * 4;
-	srd.SysMemSlicePitch = srd.SysMemPitch * frameCur.height;
+	srd.pSysMem = texData;
+	srd.SysMemPitch = texPitch;
+	srd.SysMemSlicePitch = texPitch * texH;
 
 	// set up the shader resource view
 	D3D11_SHADER_RESOURCE_VIEW_DESC svd;
@@ -501,9 +561,14 @@ bool Sprite::APNGLoaderState::CreateAnimFrame(LoadContext *ctx)
 		// discard the aborted frame
 		ctx->animFrames.pop_back();
 
+		// stop decoding - on OOM, retrying every frame just prolongs the pressure
+		eof = true;
+
 		// return failure
 		return false;
 	}
+
+	loadedTexBytes += frameBytes;
 
 	// success
 	return true;
