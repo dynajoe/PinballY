@@ -375,7 +375,7 @@ bool Sprite::LoadAPNG(const WCHAR *filename, POINTF normalizedSize, SIZE pixSize
 	// set up to load frames on demand.  If not, we'll simply fall back
 	// on the generic WIC loader, to attempt to load the file as a
 	// contentional single-frame PNG or some other image type.
-	std::unique_ptr<APNGLoaderState> loader(new APNGLoaderState());
+	std::unique_ptr<APNGLoaderState> loader(new APNGLoaderState(pixSize));
 	if (loader->Init(this, filename, normalizedSize, pixSize))
 	{
 		// create the mesh
@@ -431,17 +431,22 @@ bool Sprite::APNGLoaderState::Init(Sprite *sprite, const WCHAR *filename, POINTF
 	// Start the image processing
 	StartProcessing();
 
-	// If it's not animated, or decoding fails (including an allocation failure),
-	// fall back to the standard static WIC loader.
+	// Read the first frame.  If decoding fails, or the PNG file doesn't
+	// have the added chunks that make it an APNG, abort and use the
+	// standard WIC loader.  A decoding exception (such as an allocation
+	// failure on an oversized image) counts as a decoding failure.
 	try
 	{
 		if (!ReadThroughNextFrame() || !isAnimated)
 			return false;
+
+		// Create first snimation frame
 		if (!CreateAnimFrame(sprite->loadContext))
 			return false;
 	}
-	catch (const std::exception &)
+	catch (std::exception &exc)
 	{
+		LogFile::Get()->Write(_T("APNG: exception decoding first frame (%hs); falling back to static image loader\n"), exc.what());
 		return false;
 	}
 
@@ -451,16 +456,26 @@ bool Sprite::APNGLoaderState::Init(Sprite *sprite, const WCHAR *filename, POINTF
 
 void Sprite::APNGLoaderState::DecodeNext(LoadContext *ctx)
 {
-	// This runs during rendering, so on an allocation failure mid-decode, stop
-	// the animation gracefully rather than letting the exception crash the app.
+	// read through the next frame
+	//
+	// This runs during rendering, so on an allocation failure mid-decode,
+	// we stop the animation gracefully rather than letting the exception
+	// crash the app.
 	try
 	{
 		if (!eof && ReadThroughNextFrame())
-			CreateAnimFrame(ctx);
+		{
+			// If the frame can't be created - a texture error, or the
+			// animation reached its texture memory budget - stop decoding,
+			// and loop over the frames we already have.  Retrying on every
+			// rendering pass would just prolong the memory pressure.
+			if (!CreateAnimFrame(ctx))
+				eof = true;
+		}
 	}
-	catch (const std::exception &)
+	catch (std::exception &exc)
 	{
-		LogFile::Get()->Write(_T("APNG: decode failed (out of memory?); stopping animation\n"));
+		LogFile::Get()->Write(_T("APNG: exception decoding frame (%hs); stopping animation\n"), exc.what());
 		eof = true;
 	}
 }
@@ -471,20 +486,44 @@ bool Sprite::APNGLoaderState::CreateAnimFrame(LoadContext *ctx)
 	if (frameCur.data == nullptr)
 		return false;
 
-	// Downscale oversized frames to display size.  We keep every frame resident
-	// as a texture, so full-res multi-frame APNGs can exhaust the address space.
-	static const UINT maxEdge = 512;
+	// Figure the frame's texture size.  We keep every frame resident as a
+	// texture for the duration of the animation, so a full-resolution
+	// multi-frame APNG can exhaust the address space.  There's no point in
+	// storing more pixels than the sprite's on-screen size, so downscale
+	// oversized frames to the target pixel size, or to a fixed default if
+	// the caller didn't provide a size.
+	LONG longestTarget = max(targetPixSize.cx, targetPixSize.cy);
+	UINT maxEdge = longestTarget > 0 ? static_cast<UINT>(longestTarget) : 512;
 	UINT texW = frameCur.width, texH = frameCur.height;
+	if (frameCur.width > maxEdge || frameCur.height > maxEdge)
+	{
+		UINT longEdge = max(frameCur.width, frameCur.height);
+		double s = static_cast<double>(maxEdge) / longEdge;
+		texW = max(static_cast<UINT>(frameCur.width * s), 1U);
+		texH = max(static_cast<UINT>(frameCur.height * s), 1U);
+	}
+
+	// Cap the total animation texture memory; when the cap is reached, stop
+	// decoding and loop over the frames we already have.  Always allow the
+	// first frame, so that there's at least a static image to display.  Do
+	// this before the resampling step below, so that we don't waste the
+	// resampling work on a frame we're only going to discard.
+	const size_t maxTexBytes = 64 * 1024 * 1024;
+	const size_t frameBytes = static_cast<size_t>(texW) * texH * 4;
+	if (!ctx->animFrames.empty() && loadedTexBytes + frameBytes > maxTexBytes)
+	{
+		LogFile::Get()->Write(_T("APNG: %u MB texture budget reached after %u frame(s); ")
+			_T("capping animation to avoid exhausting memory\n"),
+			(unsigned)(maxTexBytes / (1024 * 1024)), (unsigned)ctx->animFrames.size());
+		return false;
+	}
+
+	// downscale the frame if we selected a reduced size above
 	const BYTE *texData = frameCur.data.get();
 	UINT texPitch = frameCur.width * 4;
 	DirectX::ScratchImage scaled;   // owns the downscaled pixels while we upload
-	if (frameCur.width > maxEdge || frameCur.height > maxEdge)
+	if (texW != frameCur.width || texH != frameCur.height)
 	{
-		UINT longEdge = frameCur.width > frameCur.height ? frameCur.width : frameCur.height;
-		double s = static_cast<double>(maxEdge) / longEdge;
-		texW = static_cast<UINT>(frameCur.width * s); if (texW < 1) texW = 1;
-		texH = static_cast<UINT>(frameCur.height * s); if (texH < 1) texH = 1;
-
 		// high-quality resample via DirectXTex (already a project dependency)
 		DirectX::Image srcImg;
 		ZeroMemory(&srcImg, sizeof(srcImg));
@@ -496,26 +535,12 @@ bool Sprite::APNGLoaderState::CreateAnimFrame(LoadContext *ctx)
 		srcImg.pixels = frameCur.data.get();
 		if (FAILED(DirectX::Resize(srcImg, texW, texH, DirectX::TEX_FILTER_FANT, scaled)))
 		{
-			// resize failed (e.g. out of memory) - stop decoding, keep what we have
-			eof = true;
+			// resize failed (e.g. out of memory)
 			return false;
 		}
 		const DirectX::Image *out = scaled.GetImage(0, 0, 0);
 		texData = out->pixels;
 		texPitch = static_cast<UINT>(out->rowPitch);
-	}
-
-	// Cap total animation texture memory; when exceeded, stop and loop what we
-	// have.  Always allow the first frame so there's something to display.
-	const size_t maxTexBytes = 64 * 1024 * 1024;
-	const size_t frameBytes = static_cast<size_t>(texW) * texH * 4;
-	if (!ctx->animFrames.empty() && loadedTexBytes + frameBytes > maxTexBytes)
-	{
-		LogFile::Get()->Write(_T("APNG: %u MB texture budget reached after %u frame(s); ")
-			_T("capping animation to avoid exhausting memory\n"),
-			(unsigned)(maxTexBytes / (1024 * 1024)), (unsigned)ctx->animFrames.size());
-		eof = true;
-		return false;
 	}
 
 	// set up the D3D texture descriptor
@@ -560,9 +585,6 @@ bool Sprite::APNGLoaderState::CreateAnimFrame(LoadContext *ctx)
 
 		// discard the aborted frame
 		ctx->animFrames.pop_back();
-
-		// stop decoding - on OOM, retrying every frame just prolongs the pressure
-		eof = true;
 
 		// return failure
 		return false;
