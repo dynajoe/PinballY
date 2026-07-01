@@ -957,13 +957,13 @@ RememberJSButtonSource = 0
 #
 # There's a special form for grammatical agreement in number for
 # the Filter.Count and Credits fields.  You can create a variable
-# singular/plural form like this: {Filter.Count:Table:Tables:Tablez}.  
+# singular/plural form like this: [Filter.Count:Table:Tables:Tablez].  
 # The word after the first colon is used as the expansion if the 
 # count is 1, so this gives you the singular form.  The word after 
 # the second colon is selected if the count is greater than one.  
 # The word after the third colon is used if the count is zero.
 # The third "zero" variation is optional; the plural form is used 
-# if it's not specified.  So {Filter.Count:Table:Tables:Tablez} 
+# if it's not specified.  So [Filter.Count:Table:Tables:Tablez] 
 # expands to "Table" if the filter count is 1, "Tables" if it's
 # greater than 1, or "Tablez" if it's 0.  In English, you only
 # need the first two for grammatical agreement, since zero is
