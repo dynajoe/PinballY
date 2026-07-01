@@ -5095,6 +5095,14 @@ DWORD Application::GameMonitorThread::Main()
 					statusList.Error(MsgFmt(_T("%s: %s"), itemDesc.c_str(), MsgFmt(IDS_ERR_CAP_ITEM_FFMPEG_LAUNCH, err.Get()).Get()));
 					captureOkay = false;
 					abortCapture = true;
+
+					// Delete the ffmpeg output temp file.  On a successful launch,
+					// CopyOutputToLog deletes it after copying it to the log, but
+					// we won't get that far on this path.  Close our file handle
+					// first so that the delete can succeed.
+					hStdOut = nullptr;
+					if (fnameStdOut.length() != 0)
+						DeleteFile(fnameStdOut.c_str());
 				}
 
 				// add a blank line to the log after the FFMPEG output, for readability 
