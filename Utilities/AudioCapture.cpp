@@ -15,9 +15,7 @@ void EnumDirectShowAudioInputDevices(std::function<bool(const AudioCaptureDevice
 	// create the audio device enumerator
 	RefPtr<ICreateDevEnum> pCreateDevEnum;
 	RefPtr<IEnumMoniker> pEnumMoniker;
-	LPMALLOC coMalloc = nullptr;
-	if (SUCCEEDED(CoGetMalloc(1, &coMalloc))
-		&& SUCCEEDED(CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pCreateDevEnum)))
+	if (SUCCEEDED(CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pCreateDevEnum)))
 		&& pCreateDevEnum->CreateClassEnumerator(CLSID_AudioInputDeviceCategory, &pEnumMoniker, 0) == S_OK
 		&& pEnumMoniker != nullptr)
 	{
