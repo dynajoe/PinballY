@@ -368,13 +368,29 @@ bool VLCAudioVideoPlayer::OpenWithTarget(const TCHAR *path, ErrorHandler &eh, Ta
 			// these options are supposed to at least reduce them.  In
 			// practice, unfortunately, not by much.
 			// 
-			static const char *args[] = {
-				"--no-lua",
-				"--deinterlace=0",
-				"--verbose=-1",
-				"--quiet",
-			};
-			if ((vlcInst = libvlc_new_(countof(args), args)) == nullptr)
+			// --aout=<module> - optional audio output module override, from
+			// the Video.VLCAudioOutput config var.  VLC's default Windows
+			// output (mmdevice) registers per-session OS audio callbacks
+			// (IAudioSessionEvents), and its teardown races those callbacks:
+			// destroying a player while a notification is in flight crashes
+			// in libmmdevice_plugin.dll on an OS worker thread.  Selecting
+			// "directsound" (or "waveout"; both are bundled) uses an output
+			// with no session callbacks, avoiding the race process-wide.
+			// Unset keeps VLC's default selection.
+			static char aoutOpt[64];
+			const char *args[8];
+			int nArgs = 0;
+			args[nArgs++] = "--no-lua";
+			args[nArgs++] = "--deinterlace=0";
+			args[nArgs++] = "--verbose=-1";
+			args[nArgs++] = "--quiet";
+			TSTRING aout = ConfigManager::GetInstance()->Get(_T("Video.VLCAudioOutput"), _T(""));
+			if (!aout.empty() && aout.length() < 48)
+			{
+				sprintf_s(aoutOpt, "--aout=%ws", aout.c_str());
+				args[nArgs++] = aoutOpt;
+			}
+			if ((vlcInst = libvlc_new_(nArgs, args)) == nullptr)
 			{
 				// VLC init failed.  If this has happened before, don't
 				// bother showing another message; just fail silently.
