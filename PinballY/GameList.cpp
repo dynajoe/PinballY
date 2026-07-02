@@ -4619,6 +4619,61 @@ bool GameListItem::GetMediaItems(std::list<TSTRING> &filenames,
 			break;
 		}
 
+		// Enumerate the files in this page's media folder once.  The
+		// per-candidate existence and timestamp checks in the loops below
+		// then become in-memory lookups instead of a filesystem call for
+		// every (index x extension) combination.  For an indexed type
+		// (e.g. instruction cards) this replaces dozens of FileExists() /
+		// GetFileAttributesEx() calls per page with a single directory scan.
+		std::unordered_map<TSTRING, FILETIME> dirFiles;
+		{
+			// figure the folder to scan: the page subfolder for a paged
+			// type, otherwise the media folder itself
+			TCHAR pageDir[MAX_PATH];
+			if (mediaType.pageList != nullptr)
+				PathCombine(pageDir, dir, mediaType.pageList[pageno]);
+			else
+				_tcscpy_s(pageDir, dir);
+
+			TCHAR pat[MAX_PATH];
+			PathCombine(pat, pageDir, _T("*"));
+
+			WIN32_FIND_DATA fd;
+			HANDLE hFind = FindFirstFileEx(pat, FindExInfoBasic, &fd,
+				FindExSearchNameMatch, NULL, 0);
+			if (hFind != INVALID_HANDLE_VALUE)
+			{
+				do
+				{
+					// index actual files only, not subdirectories
+					if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+					{
+						TSTRING key(fd.cFileName);
+						for (auto &c : key) c = _totlower(c);
+						dirFiles[key] = fd.ftLastWriteTime;
+					}
+				} while (FindNextFile(hFind, &fd));
+				FindClose(hFind);
+			}
+		}
+
+		// Look up a leaf filename (case-insensitively) among the files
+		// enumerated above.  Returns true if the file exists, filling in
+		// *ft with its last-write time when 'ft' is non-null.  This stands
+		// in for the FileExists() / GetFileAttributesEx() calls we'd
+		// otherwise make once per candidate name.
+		auto findFile = [&dirFiles](const TCHAR *leaf, FILETIME *ft) -> bool
+		{
+			TSTRING key(leaf);
+			for (auto &c : key) c = _totlower(c);
+			auto it = dirFiles.find(key);
+			if (it == dirFiles.end())
+				return false;
+			if (ft != nullptr)
+				*ft = it->second;
+			return true;
+		};
+
 		// iterate over image index values
 		for (int mediaIndex = 0; mediaIndex <= maxMediaIndex; ++mediaIndex)
 		{
@@ -4680,7 +4735,7 @@ bool GameListItem::GetMediaItems(std::list<TSTRING> &filenames,
 				bool include = true;
 
 				// if the GMI_EXISTS flag is set, only include the file if it exists
-				if ((flags & GMI_EXISTS) != 0 && !FileExists(fullName))
+				if ((flags & GMI_EXISTS) != 0 && !findFile(PathFindFileName(relName), nullptr))
 					include = false;
 
 				// If GMI_NO_SWF is set, skip it if it's an SWF file.  Note that there's
@@ -4698,7 +4753,7 @@ bool GameListItem::GetMediaItems(std::list<TSTRING> &filenames,
 					bool swf = true;
 
 					// ...but if the file exists, check the contents to be sure
-					if (FileExists(fullName))
+					if (findFile(PathFindFileName(relName), nullptr))
 					{
 						ImageFileDesc desc;
 						if (GetImageFileInfo(fullName, desc) && desc.imageType != ImageFileDesc::ImageType::SWF)
@@ -4716,9 +4771,9 @@ bool GameListItem::GetMediaItems(std::list<TSTRING> &filenames,
 				// it's older, keep the last item and skip this item.
 				if (include && (flags & GMI_NEWEST) != 0)
 				{
-					// get this file's attributes
-					WIN32_FILE_ATTRIBUTE_DATA attrs;
-					if (GetFileAttributesEx(fullName, GetFileExInfoStandard, &attrs))
+					// get this file's last-write time from the enumerated set
+					FILETIME ftWrite;
+					if (findFile(PathFindFileName(relName), &ftWrite))
 					{
 						// If this is the first file of this group that we've found so far,
 						// include it, since there's nothing newer to consider yet.  If we've
@@ -4726,7 +4781,7 @@ bool GameListItem::GetMediaItems(std::list<TSTRING> &filenames,
 						// the newer item.
 						if (addedToGroup)
 						{
-							if (CompareFileTime(&attrs.ftLastWriteTime, &lastFileTime) > 0)
+							if (CompareFileTime(&ftWrite, &lastFileTime) > 0)
 							{
 								// this file is newer - kick out the previous item and keep
 								// this item instead
@@ -4744,11 +4799,11 @@ bool GameListItem::GetMediaItems(std::list<TSTRING> &filenames,
 						// find another item at the same level and need to repeat this test
 						// on the next file
 						if (include)
-							lastFileTime = attrs.ftLastWriteTime;
+							lastFileTime = ftWrite;
 					}
 					else
 					{
-						// we couldn't get this file's attributes - don't include it after all
+						// the file isn't present - don't include it after all
 						include = false;
 					}
 				}
