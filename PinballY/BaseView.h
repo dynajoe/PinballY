@@ -255,8 +255,9 @@ protected:
 	// app message handling
 	virtual bool OnAppMessage(UINT msg, WPARAM wParam, LPARAM lParam) override;
 
-	// overlay video ending
-	void OnEndOverlayVideo();
+	// Overlay video ending.  Virtual so that subclasses using the overlay
+	// slot for their own media (e.g., the PUP pack views) can chain media.
+	virtual void OnEndOverlayVideo();
 	void OnEndStartupVideo();
 
 	// Drop area.  This describes a target area within the window where

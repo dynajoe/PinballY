@@ -1,0 +1,13 @@
+Active,ID,Descript,trigger,Screen,PlayList,PlayFile,Volume,Priority,RestSeconds,Loop,PlayAction,Counter
+1,t_attract,Attract loop,L1,2,Attract,,80,1,0,1,Loop,
+1,t_bonus,Bonus count,W4=1,1,Bonus,,100,3,0,0,Play,
+1,t_mb,Multiball start,S16,1,Multiball,,100,10,0,0,Play,
+1,t_jackpot,Jackpot flash,S20,2,Jackpot,,100,5,2,0,Play,
+1,t_pupevent,PupEvent 801,E801,2,Jackpot,,,7,0,0,Play,
+1,t_combo,Combo,"W4=1,S16",3,Bonus,,50,4,0,0,Play,
+1,t_restA,Rest window A,W40,5,Rest,,,,10,0,Play,
+1,t_restB,Rest window B,W41,5,Rest,,,,0,0,Play,
+1,t_rot2,Rotation two,W30,2,Jackpot,jackpot.mp4,,6,0,0,Play,2
+1,t_rot1,Rotation one,W30,2,Attract,attract_loop.mp4,,6,0,0,Play,1
+1,t_setbg,New background,W50,2,Jackpot,,,8,0,0,SetBG,
+1,t_skip,Skip same pri,W51,2,Jackpot,,,5,0,0,SkipSamePrty,

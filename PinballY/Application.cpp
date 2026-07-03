@@ -44,6 +44,7 @@
 #include "InstCardView.h"
 #include "AudioManager.h"
 #include "DOFClient.h"
+#include "PupPack/PupPackManager.h"
 #include "TextureShader.h"
 #include "I420Shader.h"
 #include "DMDShader.h"
@@ -383,6 +384,9 @@ int Application::EventLoop(int nCmdShow)
 	// set up DOF before creating the UI
 	if (ConfigManager::GetInstance()->GetBool(ConfigVars::DOFEnable, true))
 		DOFClient::Init();
+
+	// set up the PUP pack manager (checks its own config enable var)
+	PupPackManager::Init();
 
 	// initialize the game list
 	CapturingErrorHandler loadErrs;
@@ -776,6 +780,9 @@ Application::~Application()
 
 	// shut down the DOF client
 	DOFClient::Shutdown(true);
+
+	// shut down the PUP pack manager
+	PupPackManager::Shutdown();
 
 	// delete the game list
 	GameList::Shutdown();
@@ -1450,8 +1457,22 @@ void Application::BeginRunningGameMode(GameListItem *game, GameSystem *system)
 		cv->BeginRunningGameMode(game, system, cvvideo);
 		if (cvvideo)
 			playVideosInBackground = true;
-		return true; 
+		return true;
 	});
+
+	// The PUP pack was started at pre-launch (see PlayfieldView::
+	// LaunchQueuedGame), so that the PinDisplay COM server was already
+	// registered when the table script loaded.  Now that the built-in
+	// windows have taken their topmost slots, re-assert the pack's
+	// overlay windows above them, and count its videos as background
+	// videos so the rendering loop keeps them playing while the game
+	// has the foreground.
+	if (auto ppm = PupPackManager::Get(); ppm != nullptr)
+	{
+		ppm->OnGameLoaded();
+		if (ppm->HasActiveVideos())
+			playVideosInBackground = true;
+	}
 
 	// Now start the media sync process for the secondary windows, by
 	// syncing the backglass window.  Each window will forward the
@@ -1465,6 +1486,10 @@ void Application::BeginRunningGameMode(GameListItem *game, GameSystem *system)
 
 void Application::EndRunningGameMode()
 {
+	// release the PUP pack for the departing game
+	if (auto ppm = PupPackManager::Get(); ppm != nullptr)
+		ppm->EndRunningGameMode();
+
 	// End running game mode in the backglass, DMD, and topper windows
 	if (auto bgv = GetBackglassView(); bgv != nullptr)
 		bgv->EndRunningGameMode();

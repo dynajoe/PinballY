@@ -1,0 +1,6 @@
+ScreenNum,Folder,Description,AlphaSort,RestSeconds,Volume,Priority
+2,Attract,Attract loop,1,0,80,1
+1,Bonus,Bonus count,1,0,100,3
+1,Multiball,Multiball start,0,0,100,10
+2,Jackpot,Jackpot flash,1,0,70,5
+5,Rest,Rest-gated list,1,3,60,2
