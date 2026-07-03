@@ -22,6 +22,9 @@
     <Filter Include="Scripts">
       <UniqueIdentifier>{31bf4dd3-0ff3-43bd-b3e3-d4df6f19481b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PupPack">
+      <UniqueIdentifier>{b7a2c9d4-5e31-4f8a-9c06-2d7e8f1a3b45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -185,6 +188,27 @@
     </ClCompile>
     <ClCompile Include="CustomView.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PupPack\PupComServer.cpp">
+      <Filter>PupPack</Filter>
+    </ClCompile>
+    <ClCompile Include="PupPack\PupDmdMatch.cpp">
+      <Filter>PupPack</Filter>
+    </ClCompile>
+    <ClCompile Include="PupPack\PupLoader.cpp">
+      <Filter>PupPack</Filter>
+    </ClCompile>
+    <ClCompile Include="PupPack\PupPackManager.cpp">
+      <Filter>PupPack</Filter>
+    </ClCompile>
+    <ClCompile Include="PupPack\PupTriggerEngine.cpp">
+      <Filter>PupPack</Filter>
+    </ClCompile>
+    <ClCompile Include="PupPack\PupView.cpp">
+      <Filter>PupPack</Filter>
+    </ClCompile>
+    <ClCompile Include="PupPack\PupWin.cpp">
+      <Filter>PupPack</Filter>
     </ClCompile>
     <ClCompile Include="LitehtmlHost.cpp">
       <Filter>Source Files</Filter>
@@ -391,6 +415,36 @@
     </ClInclude>
     <ClInclude Include="CustomView.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupComServer.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupCsv.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupBusProtocol.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupDmdMatch.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupLoader.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupModel.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupPackManager.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupTriggerEngine.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupView.h">
+      <Filter>PupPack</Filter>
+    </ClInclude>
+    <ClInclude Include="PupPack\PupWin.h">
+      <Filter>PupPack</Filter>
     </ClInclude>
     <ClInclude Include="LitehtmlHost.h">
       <Filter>Header Files</Filter>
