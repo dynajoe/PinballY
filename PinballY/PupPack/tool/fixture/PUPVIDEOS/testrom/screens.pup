@@ -1,0 +1,3 @@
+ScreenNum,ScreenDes,PlayList,PlayFile,Loop
+1,DMD,,,1
+2,BackGlass,Attract,attract_loop.mp4,1

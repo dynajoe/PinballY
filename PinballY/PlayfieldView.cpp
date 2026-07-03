@@ -42,6 +42,7 @@
 #include "MouseButtons.h"
 #include "AudioManager.h"
 #include "DOFClient.h"
+#include "PupPack/PupPackManager.h"
 #include "AudioVideoPlayer.h"
 #include "VLCAudioVideoPlayer.h"
 #include "HighScores.h"
@@ -5658,6 +5659,13 @@ void PlayfieldView::LaunchQueuedGame()
 
 	// kill any pending return-from-game timers, as we're going into a new game
 	KillTimer(hWnd, restoreDOFAndDMDTimerID);
+
+	// Start the PUP pack for the launching game BEFORE the game process
+	// exists.  Table scripts connect to the PinDisplay COM server during
+	// their script load, well before the game window appears, so the
+	// server (and the pack it dispatches into) must already be up.
+	if (auto ppm = PupPackManager::Get(); ppm != nullptr)
+		ppm->BeginRunningGameMode(game, sys);
 
 	// try launching the game
 	Application::InUiErrorHandler eh;
