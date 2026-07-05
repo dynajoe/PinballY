@@ -915,6 +915,9 @@ void BaseView::ScaleDrawingLayerSprite(JsDrawingLayer &l)
 {
 	if (auto s = l.sprite.Get(); s != nullptr)
 	{
+		// apply the layer rotation before the fit calc below reads s->rotation.z
+		s->rotation.z = l.rotation;
+
 		// Figure the window's width in terms of its height.  The
 		// window's height in normalized sprite units is fixed at 1.0,
 		// so this is the same as figuring the width in normalized
@@ -1455,6 +1458,22 @@ void BaseView::JsDrawingLayerSetScale(JsValueRef self, JavascriptEngine::JsObj s
 			exc.Log(_T("DrawingLayer.setScale()"));
 			js->Throw(exc.jsErrorCode, _T("DrawingLayer.setScale()"));
 		}
+	}
+}
+
+void BaseView::JsDrawingLayerSetRotation(JsValueRef self, float degrees)
+{
+	float radians = degrees * (3.14159265358979f / 180.0f);
+	if (auto l = JsThisToDrawingLayer(self); l != nullptr)
+	{
+		l->rotation = radians;
+		ScaleDrawingLayerSprite(*l);
+	}
+	else if (auto s = JsThisToDrawingLayerSprite(self); s != nullptr)
+	{
+		// sprite-backed system layer (e.g. launch overlay): no JsDrawingLayer to fit
+		s->rotation.z = radians;
+		s->UpdateWorld();
 	}
 }
 

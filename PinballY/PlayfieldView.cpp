@@ -1414,6 +1414,8 @@ bool PlayfieldView::InitJsWinObj(FrameWin *frame, JsValueRef jswinobj, const CHA
 			&BaseView::JsDrawingLayerClear, view, eh)
 		|| !js->DefineObjMethod(drawingLayerProto, "DrawingLayer", "setScale",
 			&BaseView::JsDrawingLayerSetScale, view, eh)
+		|| !js->DefineObjMethod(drawingLayerProto, "DrawingLayer", "setRotation",
+			&BaseView::JsDrawingLayerSetRotation, view, eh)
 		|| !js->DefineObjMethod(drawingLayerProto, "DrawingLayer", "setPos",
 			&BaseView::JsDrawingLayerSetPos, view, eh)
 		|| !js->DefineGetterSetter(drawingLayerProto, "DrawingLayer", "alpha",
