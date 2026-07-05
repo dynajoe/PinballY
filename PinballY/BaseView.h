@@ -410,6 +410,9 @@ protected:
 			float span = 1.0f;
 		} scaling;
 
+		// rotation angle in radians (ScaleDrawingLayerSprite factors it into the fit)
+		float rotation = 0.0f;
+
 		// DMD-style message graphics are generated asynchronously
 		// in a background thread.  When we have a threaded request
 		// outstanding, we remember the sequence number of the request
@@ -437,6 +440,7 @@ protected:
 	float JsDrawingLayerGetAlpha(JsValueRef self) const;
 	void JsDrawingLayerSetAlpha(JsValueRef self, float alpha);
 	void JsDrawingLayerSetScale(JsValueRef self, JavascriptEngine::JsObj scale);
+	void JsDrawingLayerSetRotation(JsValueRef self, float degrees);
 	void JsDrawingLayerSetPos(JsValueRef self, float x, float y, WSTRING align);
 	void JsDrawingLayerPlay(JsValueRef self);
 	void JsDrawingLayerPause(JsValueRef self);
