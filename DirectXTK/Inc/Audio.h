@@ -40,7 +40,7 @@
 #include <xaudio2fx.h>
 #include <x3daudio.h>
 #include <xapofx.h>
-#pragma error("Using wrong SDK - DX SDK version must be used for Windows 7 compatibility") 
+// MJR guard removed - building with Win8+ XAudio2 (no legacy DXSDK needed)
 #pragma comment(lib,"xaudio2.lib")
 #else
 // Using XAudio 2.7 requires the DirectX SDK.
